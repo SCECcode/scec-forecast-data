@@ -1,0 +1,363 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
+
+-- -----------------------------------------------------
+-- Schema etas_eval_fdm
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema etas_eval_fdm
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `etas_eval_fdm` DEFAULT CHARACTER SET utf8 ;
+USE `etas_eval_fdm` ;
+
+-- -----------------------------------------------------
+-- Table `etas_eval_fdm`.`people`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `etas_eval_fdm`.`people` (
+  `people_id` INT NOT NULL AUTO_INCREMENT,
+  `people_first` VARCHAR(45) NULL,
+  `people_last` VARCHAR(45) NULL,
+  `people_email` VARCHAR(45) NULL,
+  `people_organization` VARCHAR(45) NULL,
+  PRIMARY KEY (`people_id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `etas_eval_fdm`.`studies`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `etas_eval_fdm`.`studies` (
+  `study_id` INT NOT NULL AUTO_INCREMENT,
+  `study_name` VARCHAR(45) NOT NULL,
+  `responsible_person` INT NULL,
+  `study_description` VARCHAR(45) NULL COMMENT 'A text description sufficient to identify this study',
+  `study_created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `studies_modified` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`study_id`),
+  INDEX `person_id_idx` (`responsible_person` ASC),
+  CONSTRAINT `person_id`
+    FOREIGN KEY (`responsible_person`)
+    REFERENCES `etas_eval_fdm`.`people` (`people_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `etas_eval_fdm`.`experiments`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `etas_eval_fdm`.`experiments` (
+  `experiment_id` INT NOT NULL AUTO_INCREMENT COMMENT 'In this case, an experiment is one or more forecasts. In this case, it is 11 forecasts per experiment.',
+  `experiment_description` VARCHAR(45) NULL,
+  `experiment_created` DATETIME NOT NULL,
+  `experiment_modified` DATETIME NOT NULL,
+  `study_id` INT NOT NULL COMMENT 'The study id is a foreign key from the studies table. Users determine the number of experiments in a study by checking the rows in this table. This is part of the primary key to constrain an experiment to a single study.',
+  PRIMARY KEY (`experiment_id`),
+  INDEX `study_id_idx` (`study_id` ASC),
+  CONSTRAINT `study_id`
+    FOREIGN KEY (`study_id`)
+    REFERENCES `etas_eval_fdm`.`studies` (`study_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `etas_eval_fdm`.`etas_model_type`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `etas_eval_fdm`.`etas_model_type` (
+  `etas_model_type_id` INT NOT NULL AUTO_INCREMENT,
+  `etas_model_type_name` VARCHAR(45) NOT NULL COMMENT 'enumeration field with values:\nUCERF3-ETAS\nNOFAULTS',
+  `etas_model_description` VARCHAR(45) NULL COMMENT 'u3etas_files = [\nnofaults_files = [\nThese are the names of the two models in the git repo',
+  PRIMARY KEY (`etas_model_type_id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `etas_eval_fdm`.`etas_forecast`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `etas_eval_fdm`.`etas_forecast` (
+  `forecast_id` INT NOT NULL AUTO_INCREMENT,
+  `forecast_name` VARCHAR(45) NOT NULL COMMENT 'The git repo has a list of names for the 11 ensembles. there are 22 here because 1 for each etas model:\nu3etas_files = [\n\"2019_07_16-ComCatM7p1_ci38457511_7DaysAfter_ShakeMapSurfaces-noSpont-full_td-scale1.14\",\n\"2019_07_27-ComCatM7p1_ci38457511_21DaysAfter_ShakeMapSurfaces-noSpont-full_td-scale1.14\",\n\"2019_08_03-ComCatM7p1_ci38457511_28DaysAfter_ShakeMapSurfaces-noSpont-full_td-scale1.14\",\n\"2019_08_19-ComCatM7p1_ci38457511_14DaysAfter_ShakeMapSurfaces-noSpont-full_td-scale1.14\",\n\"2019_08_19-ComCatM7p1_ci38457511_35DaysAfter_ShakeMapSurfaces-noSpont-full_td-scale1.14\",\n\"2019_08_19-ComCatM7p1_ci38457511_42DaysAfter_ShakeMapSurfaces-noSpont-full_td-scale1.14\",\n\"2019_08_24-ComCatM7p1_ci38457511_49DaysAfter_ShakeMapSurfaces-noSpont-full_td-scale1.14\",\n\"2019_08_31-ComCatM7p1_ci38457511_56DaysAfter_ShakeMapSurfaces\",\n\"2019_09_04-ComCatM7p1_ci38457511_ShakeMapSurfaces\",\n\"2019_09_09-ComCatM7p1_ci38457511_63DaysAfter_ShakeMapSurfaces\",\n\"2019_09_16-ComCatM7p1_ci38457511_70DaysAfter_ShakeMapSurfaces\"\n]' /* comment truncated */ /*
+nofaults_files = [
+"2019_07_16-ComCatM7p1_ci38457511_7DaysAfter_ShakeMapSurfaces-noSpont-NoFaults",
+"2019_07_27-ComCatM7p1_ci38457511_21DaysAfter_ShakeMapSurfaces-noSpont-full_td-scale1.14-NoFaults",
+"2019_08_03-ComCatM7p1_ci38457511_28DaysAfter_ShakeMapSurfaces-noSpont-full_td-scale1.14-NoFaults",
+"2019_08_19-ComCatM7p1_ci38457511_14DaysAfter_ShakeMapSurfaces-noSpont-NoFaults",
+"2019_08_19-ComCatM7p1_ci38457511_35DaysAfter_ShakeMapSurfaces-noSpont-full_td-scale1.14-NoFaults",
+"2019_08_19-ComCatM7p1_ci38457511_42DaysAfter_ShakeMapSurfaces-noSpont-full_td-scale1.14-NoFaults",
+"2019_08_24-ComCatM7p1_ci38457511_49DaysAfter_ShakeMapSurfaces-noSpont-full_td-scale1.14-NoFaults",
+"2019_08_31-ComCatM7p1_ci38457511_56DaysAfter_ShakeMapSurfaces-NoFaults",
+"2019_09_04-ComCatM7p1_ci38457511_ShakeMapSurfaces-NoFaults",
+"2019_09_09-ComCatM7p1_ci38457511_63DaysAfter_ShakeMapSurfaces-NoFaults",
+"2019_09_16-ComCatM7p1_ci38457511_70DaysAfter_ShakeMapSurfaces-NoFaults"*/,
+  `forecast_description` VARCHAR(45) NULL,
+  `forecast_config_json` BLOB NOT NULL,
+  `number_simulations` INT NOT NULL COMMENT 'In the ETAS case, there are 11 forecasts in the ensemble. The term ensemble is confusing because the is plurality several places in this experiments. In this case, this experiment is considered an ensemble because we repeat the same forecasts, for the same region, 11 times. The difference between runs in the ensemble is the start time of the forecast.',
+  `experiment_id` INT NOT NULL,
+  `etas_model_type_id` INT NULL,
+  `sim_starttime` DATETIME NOT NULL,
+  `evaluation_time` DATETIME NOT NULL,
+  `catalog_source` VARCHAR(6) NULL COMMENT 'enumeration item with values:\nComCat\nCMT',
+  `opensha_ucerf3_jar` BLOB NOT NULL,
+  `slurm_log` BLOB NOT NULL,
+  `slurm_stdout` BLOB NOT NULL,
+  `slurm_stderr` BLOB NOT NULL,
+  `results_complete_bin` BLOB NOT NULL,
+  `results_m5_preserve_chain_bin` BLOB NOT NULL,
+  PRIMARY KEY (`forecast_id`),
+  INDEX `experiment_id_idx` (`experiment_id` ASC),
+  INDEX `etas_model_type_id_idx` (`etas_model_type_id` ASC),
+  CONSTRAINT `experiment_id`
+    FOREIGN KEY (`experiment_id`)
+    REFERENCES `etas_eval_fdm`.`experiments` (`experiment_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `etas_model_type_id`
+    FOREIGN KEY (`etas_model_type_id`)
+    REFERENCES `etas_eval_fdm`.`etas_model_type` (`etas_model_type_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `etas_eval_fdm`.`etas_evaluation`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `etas_eval_fdm`.`etas_evaluation` (
+  `etas_spec_file` BLOB NOT NULL,
+  `etas_forecast_catalog_file` BLOB NOT NULL,
+  `etas_forecast_starttime` DATETIME NOT NULL,
+  `etas_forecast_endtime` DATETIME NOT NULL,
+  `etas_forecast_evaluation_type` VARCHAR(20) NULL COMMENT 'Try the test types in these filenames:\n\nbv-test_mw_2p5.json\ncum_counts_mw_2p5.npy\niedd-test_mw_2p5.json\nietd-test_mw_2p5.json\n\nl-test_mw_2p5.json\nl-test_mw_3p0.json\nl-test_mw_3p5.json\nl-test_mw_4p0.json\nl-test_mw_4p5.json\n\nm-test_mw_2p5.json\nm-test_mw_2p5_dmag0p1.json\nm-test_mw_2p5_dmag0p2.json\nm-test_mw_3p0.json\nm-test_mw_3p0_dmag0p1.json\nm-test_mw_3p0_dmag0p2.json\nm-test_mw_3p5.json\nm-test_mw_3p5_dmag0p1.json\nm-test_mw_3p5_dmag0p2.json\nm-test_mw_4p0.json\nm-test_mw_4p0_dmag0p1.json\nm-test_mw_4p0_dmag0p2.json\n\nn-test_mw_2p5.json\nn-test_mw_3p0.json\nn-test_mw_3p5.json\nn-test_mw_4p0.json\nn-test_mw_4p5.json\nn-test_mw_5p0.json\nn-test_mw_5p5.json\nn-test_mw_6p0.json\n\nprob-test_mw_2p5.json\nprob-test_mw_3p0.json\nprob-test_mw_3p5.json\nprob-test_mw_4p0.json\nprob-test_mw_4p5.json\n\ns-test_mw_2p5.json\ns-test_mw_3p0.json\ns-test_mw_3p5.json\ns-test_mw_4p0.json\ns-test_mw_4p5.json\n\nterd-test_mw_2p5.json',
+  `etas_forecast_evaluation_id` INT NOT NULL AUTO_INCREMENT COMMENT '\nCSEP Testing Results: ComCat M7.1 (ci38457511), 11 Days After, ShakeMap Surfaces, No Faults' /* comment truncated */ /*
+Forecast Name: UCERF3-ETAS
+Simulation Start Time: 2019-07-17 03:19:54.040000+00:00
+Evaluation Time: 2019-07-24 03:19:54.040000+00:00
+Catalog Source: ComCat
+Number Simulations: 100000
+Table of Contents
+
+    Visual Overview of Forecast
+        Cumulative Event Counts
+        Magnitude Histogram
+        Approximate Rate Density with Observations
+        Conditional Rate Density
+        Spatial Probability Plot
+    CSEP Consistency Tests
+        Number Test
+        Magnitude Test
+        Likelihood Test
+        Probability Test
+        Spatial Test
+    One-point Statistics
+        B-Value Test
+    Distribution-based Tests
+        Inter-event Time Distribution
+        Inter-event Distance Distribution
+        Total Earthquake Rate Distribution
+
+
+
+Based on this list of ensemble evaluation, only two types of evaluation uniform and cumulative:
+ ['n', 'm', 'l', 's', 'iedd', 'ietd', 'prob', 'terd', 'bv']
+
+ridgecrest_evaluation_bssa/2019_09_16-ComCatM7p1_ci38457511_70DaysAfter_ShakeMapSurfaces/results/
+
+
+bv-test_mw_2p5.json
+cum_counts_mw_2p5.npy
+iedd-test_mw_2p5.json
+ietd-test_mw_2p5.json
+
+l-test_mw_2p5.json
+l-test_mw_3p0.json
+l-test_mw_3p5.json
+l-test_mw_4p0.json
+l-test_mw_4p5.json
+
+m-test_mw_2p5.json
+m-test_mw_2p5_dmag0p1.json
+m-test_mw_2p5_dmag0p2.json
+m-test_mw_3p0.json
+m-test_mw_3p0_dmag0p1.json
+m-test_mw_3p0_dmag0p2.json
+m-test_mw_3p5.json
+m-test_mw_3p5_dmag0p1.json
+m-test_mw_3p5_dmag0p2.json
+m-test_mw_4p0.json
+m-test_mw_4p0_dmag0p1.json
+m-test_mw_4p0_dmag0p2.json
+
+n-test_mw_2p5.json
+n-test_mw_3p0.json
+n-test_mw_3p5.json
+n-test_mw_4p0.json
+n-test_mw_4p5.json
+n-test_mw_5p0.json
+n-test_mw_5p5.json
+n-test_mw_6p0.json
+
+prob-test_mw_2p5.json
+prob-test_mw_3p0.json
+prob-test_mw_3p5.json
+prob-test_mw_4p0.json
+prob-test_mw_4p5.json
+
+s-test_mw_2p5.json
+s-test_mw_3p0.json
+s-test_mw_3p5.json
+s-test_mw_4p0.json
+s-test_mw_4p5.json
+
+terd-test_mw_2p5.json*/,
+  `forecast_readme_md` BLOB NOT NULL,
+  `forecast_config_json` BLOB NOT NULL,
+  `forecast_evaluation_catalog_json` BLOB NOT NULL,
+  `forecast_metadata_json` BLOB NOT NULL,
+  `forecast_id` INT NOT NULL,
+  PRIMARY KEY (`etas_forecast_evaluation_id`),
+  INDEX `forecast_id_idx` (`forecast_id` ASC),
+  CONSTRAINT `forecast_id`
+    FOREIGN KEY (`forecast_id`)
+    REFERENCES `etas_eval_fdm`.`etas_forecast` (`forecast_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `etas_eval_fdm`.`etas_evaluation_plot`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `etas_eval_fdm`.`etas_evaluation_plot` (
+  `evaluation_result_id` INT NOT NULL AUTO_INCREMENT,
+  `evaluation_type` VARCHAR(5) NOT NULL COMMENT 'This should be an enumerated list of forecast plot types. tests = [\'n\', \'m\', \'l\', \'s\', \'iedd\', \'ietd\', \'prob\', \'terd\', \'bv\'] This is a list of types from the git repo by Bill. Ask bill how to handle the .npy cumulative result file. Just add a type here or declare cumulative reports as different since there was only one.' /* comment truncated */ /*
+CSEP Testing Results: ComCat M7.1 (ci38457511), 11 Days After, ShakeMap Surfaces, No Faults
+
+Forecast Name: UCERF3-ETAS
+Simulation Start Time: 2019-07-17 03:19:54.040000+00:00
+Evaluation Time: 2019-07-24 03:19:54.040000+00:00
+Catalog Source: ComCat
+Number Simulations: 100000
+Table of Contents
+
+    Visual Overview of Forecast
+        Cumulative Event Counts
+        Magnitude Histogram
+        Approximate Rate Density with Observations
+        Conditional Rate Density
+        Spatial Probability Plot
+    CSEP Consistency Tests
+        Number Test
+        Magnitude Test
+        Likelihood Test
+        Probability Test
+        Spatial Test
+    One-point Statistics
+        B-Value Test
+    Distribution-based Tests
+        Inter-event Time Distribution
+        Inter-event Distance Distribution
+        Total Earthquake Rate Distribution
+*/,
+  `evaluation_file` BLOB NOT NULL COMMENT 'A set of results files shown below for one ensemble forecast. The ensemble forecast is:\nridgecrest_evaluation_bssa/2019_09_16-ComCatM7p1_ci38457511_70DaysAfter_ShakeMapSurfaces/results/' /* comment truncated */ /*
+bv-test_mw_2p5.json
+cum_counts_mw_2p5.npy
+iedd-test_mw_2p5.json
+ietd-test_mw_2p5.json
+
+l-test_mw_2p5.json
+l-test_mw_3p0.json
+l-test_mw_3p5.json
+l-test_mw_4p0.json
+l-test_mw_4p5.json
+
+m-test_mw_2p5.json
+m-test_mw_2p5_dmag0p1.json
+m-test_mw_2p5_dmag0p2.json
+m-test_mw_3p0.json
+m-test_mw_3p0_dmag0p1.json
+m-test_mw_3p0_dmag0p2.json
+m-test_mw_3p5.json
+m-test_mw_3p5_dmag0p1.json
+m-test_mw_3p5_dmag0p2.json
+m-test_mw_4p0.json
+m-test_mw_4p0_dmag0p1.json
+m-test_mw_4p0_dmag0p2.json
+
+n-test_mw_2p5.json
+n-test_mw_3p0.json
+n-test_mw_3p5.json
+n-test_mw_4p0.json
+n-test_mw_4p5.json
+n-test_mw_5p0.json
+n-test_mw_5p5.json
+n-test_mw_6p0.json
+
+prob-test_mw_2p5.json
+prob-test_mw_3p0.json
+prob-test_mw_3p5.json
+prob-test_mw_4p0.json
+prob-test_mw_4p5.json
+
+s-test_mw_2p5.json
+s-test_mw_3p0.json
+s-test_mw_3p5.json
+s-test_mw_4p0.json
+s-test_mw_4p5.json
+
+terd-test_mw_2p5.json*/,
+  `evaluation_id` INT NOT NULL,
+  PRIMARY KEY (`evaluation_result_id`),
+  INDEX `evaluation_id_idx` (`evaluation_id` ASC),
+  CONSTRAINT `evaluation_id`
+    FOREIGN KEY (`evaluation_id`)
+    REFERENCES `etas_eval_fdm`.`etas_evaluation` (`etas_forecast_evaluation_id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `etas_eval_fdm`.`summary_evaluations`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `etas_eval_fdm`.`summary_evaluations` (
+  `summary_evaluation_id` INT NOT NULL AUTO_INCREMENT,
+  `summary_evaluation_type` VARCHAR(45) NOT NULL,
+  `summary_evaluation_file` BLOB NOT NULL,
+  `study_id` INT NOT NULL,
+  PRIMARY KEY (`summary_evaluation_id`),
+  INDEX `study_id_idx` (`study_id` ASC),
+  CONSTRAINT `study_id`
+    FOREIGN KEY (`study_id`)
+    REFERENCES `etas_eval_fdm`.`studies` (`study_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `etas_eval_fdm`.`etas_forecast_plots`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `etas_eval_fdm`.`etas_forecast_plots` (
+  `forecast_plots_id` INT NOT NULL,
+  `forecast_plot_type` VARCHAR(45) NULL COMMENT 'Enumeration Type of forecast plots created by kevin.',
+  `forecast_plots_file` BLOB NOT NULL,
+  `forecast_id` INT NOT NULL,
+  PRIMARY KEY (`forecast_plots_id`),
+  INDEX `etas_forecast_id_idx` (`forecast_id` ASC),
+  CONSTRAINT `forecast_id`
+    FOREIGN KEY (`forecast_id`)
+    REFERENCES `etas_eval_fdm`.`etas_forecast` (`forecast_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
